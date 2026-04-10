@@ -386,6 +386,13 @@ function events() {
     el.menu.classList.toggle("hidden");
   });
 
+  const menuLinks = el.menu.querySelectorAll("a");
+  menuLinks.forEach(function(link) {
+    link.addEventListener("click", function () {
+      el.menu.classList.add("hidden");
+    });
+  });
+
   el.topBtn.addEventListener("click", function () {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
