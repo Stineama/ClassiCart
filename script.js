@@ -152,16 +152,16 @@ function drawItems() {
           </div>
         </div>
 
-        <div class="mt-3">
+        <div class="mt-3 flex flex-col h-full">
           <p class="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400 sm:text-[10px]">
             ${item.brand || "Brand"}
           </p>
 
-          <h3 class="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-slate-900 sm:text-base lg:text-lg">
+          <h3 class="mt-1 min-h-[44px] line-clamp-2 text-sm font-semibold leading-snug text-slate-900 sm:min-h-[52px] sm:text-base lg:text-lg">
             ${item.title}
           </h3>
 
-          <div class="mt-2 flex items-end justify-between gap-2">
+          <div class="mt-auto flex items-end justify-between gap-2">
             <div class="min-w-0">
               ${
                 off > 0
