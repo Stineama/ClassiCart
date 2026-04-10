@@ -148,7 +148,7 @@ function drawItems() {
           }
 
           <div class="aspect-square flex items-center justify-center overflow-hidden rounded-lg">
-            <img src="${item.thumbnail}" alt="${item.title}" class="h-full w-full object-contain" />
+            <img src="${item.thumbnail}" alt="${item.title}" class="h-full w-full object-contain transition duration-300 hover:scale-110" />
           </div>
         </div>
 
@@ -157,7 +157,7 @@ function drawItems() {
             ${item.brand || "Brand"}
           </p>
 
-          <h3 class="mt-1 line-clamp-2 text-[11px] font-bold leading-tight text-slate-900 sm:text-xs">
+          <h3 class="mt-1 line-clamp-2 text-sm font-semibold leading-snug text-slate-900 sm:text-base lg:text-lg">
             ${item.title}
           </h3>
 
@@ -178,9 +178,10 @@ function drawItems() {
 
             <button 
               onclick="addToCart(${item.id})"
-              class="shrink-0 rounded-full bg-blue-700 px-2.5 py-1.5 text-[10px] font-semibold text-white transition hover:opacity-90"
+              class="shrink-0 rounded-full bg-gradient-to-r from-blue-700 to-blue-600 px-2.5 py-1.5 text-[10px] font-semibold text-white transition hover:scale-95 active:scale-90 sm:px-3 sm:text-xs lg:px-4 lg:py-2 lg:text-sm"
             >
-              Add
+            <span class="lg:hidden"> Add</span>
+            <span class="hidden lg:inline"> Add to Cart</span>
             </button>
           </div>
         </div>
