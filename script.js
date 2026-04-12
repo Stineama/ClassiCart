@@ -1,6 +1,6 @@
 const url = "https://dummyjson.com/products";
 const saveKey = "classiCartItems";
-const showNum = 20;
+const page = window.location.pathname.split("/").pop() || "index.html";
 
 const app = {
   items: [],
@@ -32,6 +32,27 @@ const el = {
   pop: document.getElementById("pop"),
   topBtn: document.getElementById("topBtn"),
   shop: document.getElementById("shop"),
+  contactForm: document.getElementById("contactForm"),
+  contactName: document.getElementById("contactName"),
+  contactEmail: document.getElementById("contactEmail"),
+  contactMessage: document.getElementById("contactMessage"),
+  contactMsg: document.getElementById("contactMsg"),
+  loginForm: document.getElementById("loginForm"),
+  loginEmail: document.getElementById("loginEmail"),
+  loginPassword: document.getElementById("loginPassword"),
+  loginEmailErr: document.getElementById("loginEmailErr"),
+  loginPasswordErr: document.getElementById("loginPasswordErr"),
+  loginMsg: document.getElementById("loginMsg"),
+  registerForm: document.getElementById("registerForm"),
+  regName: document.getElementById("regName"),
+  regEmail: document.getElementById("regEmail"),
+  regPassword: document.getElementById("regPassword"),
+  regConfirm: document.getElementById("regConfirm"),
+  regNameErr: document.getElementById("regNameErr"),
+  regEmailErr: document.getElementById("regEmailErr"),
+  regPasswordErr: document.getElementById("regPasswordErr"),
+  regConfirmErr: document.getElementById("regConfirmErr"),
+  registerMsg: document.getElementById("registerMsg"),
 };
 
 function money(num) {
@@ -55,10 +76,10 @@ function cartTotal() {
 }
 
 function showPop(msg) {
+  if (!el.pop) return;
   el.pop.textContent = msg;
   el.pop.classList.remove("opacity-0", "translate-y-2");
   el.pop.classList.add("opacity-100", "translate-y-0");
-
   clearTimeout(app.timer);
   app.timer = setTimeout(function () {
     el.pop.classList.add("opacity-0", "translate-y-2");
@@ -67,6 +88,7 @@ function showPop(msg) {
 }
 
 function loading() {
+  if (!el.loadBox) return;
   el.loadBox.innerHTML = Array.from({ length: 8 })
     .map(function () {
       return `
@@ -85,46 +107,42 @@ function loading() {
 }
 
 function stopLoading() {
-  el.loadBox.innerHTML = "";
+  if (el.loadBox) el.loadBox.innerHTML = "";
 }
 
 async function getItems() {
+  if (!el.cards) return;
   loading();
-
   try {
     const firstRes = await fetch(`${url}?limit=1`);
     const firstData = await firstRes.json();
     const total = firstData.total || 0;
-
     const res = await fetch(`${url}?limit=${total}&sortBy=title&order=asc`);
     const data = await res.json();
-
     app.items = data.products || [];
     app.showItems = app.items.slice();
     filterItems();
   } catch (error) {
     console.log(error);
-    el.cards.innerHTML = `
-      <div class="col-span-full rounded-[2rem] border border-red-200 bg-red-50 p-6 text-red-600">
-        There was an issue loading the product API. Please try again later.
-      </div>
-    `;
+    el.cards.innerHTML = `<div class="col-span-full rounded-[2rem] border border-red-200 bg-red-50 p-6 text-red-600">There was an issue loading the product API. Please try again later.</div>`;
   } finally {
     stopLoading();
   }
 }
 
 function listToShow() {
-  if (!app.word) {
-    return app.showItems.slice(0, showNum);
+  if (page === "products.html") {
+    if (!app.word) return app.showItems.slice(0, 50);
+    return app.showItems.slice(0, 50);
   }
+  if (!app.word) return app.showItems.slice(0, 20);
   return app.showItems;
 }
 
 function drawItems() {
+  if (!el.cards) return;
   const list = listToShow();
-  el.noItem.classList.toggle("hidden", list.length !== 0);
-
+  if (el.noItem) el.noItem.classList.toggle("hidden", list.length !== 0);
   if (list.length === 0) {
     el.cards.innerHTML = "";
     return;
@@ -137,51 +155,26 @@ function drawItems() {
 
       return `
       <section class="flex h-full flex-col rounded-2xl bg-white p-3 shadow-[0_10px_25px_rgba(30,41,59,0.08)] transition duration-300 hover:-translate-y-1 sm:p-4">
-        
         <div class="relative rounded-xl bg-slate-100 p-2 sm:p-3">
-          ${
-            off > 0
-              ? `<span class="absolute top-2 right-2 rounded-full bg-blue-600 px-2 py-1 text-[10px] font-bold text-white">
-                   -${off}%
-                 </span>`
-              : ``
-          }
-
+          ${off > 0 ? `<span class="absolute top-2 right-2 rounded-full bg-blue-600 px-2 py-1 text-[10px] font-bold text-white">-${off}%</span>` : ``}
           <div class="aspect-square flex items-center justify-center overflow-hidden rounded-lg">
             <img src="${item.thumbnail}" alt="${item.title}" class="h-full w-full object-contain transition duration-300 hover:scale-110" />
           </div>
         </div>
 
-        <div class="mt-3 flex flex-col h-full">
-          <p class="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400 sm:text-[10px]">
-            ${item.brand || "Brand"}
-          </p>
-
-          <h3 class="mt-1 min-h-[44px] line-clamp-2 text-sm font-semibold leading-snug text-slate-900 sm:min-h-[52px] sm:text-base lg:text-lg">
-            ${item.title}
-          </h3>
+        <div class="mt-3 flex h-full flex-col">
+          <p class="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400 sm:text-[10px]">${item.brand || "Brand"}</p>
+          <h3 class="mt-1 min-h-[44px] line-clamp-2 text-sm font-semibold leading-snug text-slate-900 sm:min-h-[52px] sm:text-base lg:text-lg">${item.title}</h3>
 
           <div class="mt-auto flex items-end justify-between gap-2">
             <div class="min-w-0">
-              ${
-                off > 0
-                  ? `<p class="text-[10px] text-slate-400 line-through">
-                       ${money(item.price)}
-                     </p>`
-                  : ``
-              }
-
-              <p class="text-xs font-bold text-slate-900 sm:text-sm">
-                ${money(newPrice)}
-              </p>
+              ${off > 0 ? `<p class="text-[10px] text-slate-400 line-through">${money(item.price)}</p>` : ``}
+              <p class="text-xs font-bold text-slate-900 sm:text-sm">${money(newPrice)}</p>
             </div>
 
-            <button 
-              onclick="addToCart(${item.id})"
-              class="shrink-0 rounded-full bg-gradient-to-r from-blue-700 to-blue-600 px-2.5 py-1.5 text-[10px] font-semibold text-white transition hover:scale-95 active:scale-90 sm:px-3 sm:text-xs lg:px-4 lg:py-2 lg:text-sm"
-            >
-            <span class="lg:hidden"> Add</span>
-            <span class="hidden lg:inline"> Add to Cart</span>
+            <button onclick="addToCart(${item.id})" class="shrink-0 rounded-full bg-gradient-to-r from-blue-700 to-blue-600 px-2.5 py-1.5 text-[10px] font-semibold text-white transition hover:scale-95 active:scale-90 sm:px-3 sm:text-xs lg:px-4 lg:py-2 lg:text-sm">
+              <span class="lg:hidden">Add</span>
+              <span class="hidden lg:inline">Add to Cart</span>
             </button>
           </div>
         </div>
@@ -193,7 +186,6 @@ function drawItems() {
 
 function filterItems() {
   const word = app.word.toLowerCase();
-
   app.showItems = app.items.filter(function (item) {
     return (
       item.title.toLowerCase().includes(word) ||
@@ -201,32 +193,29 @@ function filterItems() {
       item.category.toLowerCase().includes(word)
     );
   });
-
   drawItems();
 }
 
 function updateCart() {
   const num = cartCount();
-  el.cartNum.textContent = num;
-  el.cartNumSm.textContent = num;
-  el.totalItem.textContent = num;
-  el.totalPrice.textContent = money(cartTotal());
+  if (el.cartNum) el.cartNum.textContent = num;
+  if (el.cartNumSm) el.cartNumSm.textContent = num;
+  if (el.totalItem) el.totalItem.textContent = num;
+  if (el.totalPrice) el.totalPrice.textContent = money(cartTotal());
 }
 
 function addToCart(id) {
   const item = app.items.find(function (prod) {
     return prod.id === id;
   });
-
   if (!item) return;
 
   const oldItem = app.cart.find(function (prod) {
     return prod.id === id;
   });
 
-  if (oldItem) {
-    oldItem.quantity += 1;
-  } else {
+  if (oldItem) oldItem.quantity += 1;
+  else
     app.cart.push({
       id: item.id,
       title: item.title,
@@ -235,7 +224,6 @@ function addToCart(id) {
       category: item.category,
       quantity: 1,
     });
-  }
 
   saveCart();
   drawCart();
@@ -247,7 +235,6 @@ function removeItem(id) {
   app.cart = app.cart.filter(function (item) {
     return item.id !== id;
   });
-
   saveCart();
   drawCart();
   updateCart();
@@ -258,7 +245,6 @@ function plusItem(id) {
   const item = app.cart.find(function (prod) {
     return prod.id === id;
   });
-
   if (!item) return;
   item.quantity += 1;
   saveCart();
@@ -270,14 +256,11 @@ function minusItem(id) {
   const item = app.cart.find(function (prod) {
     return prod.id === id;
   });
-
   if (!item) return;
-
   if (item.quantity === 1) {
     removeItem(id);
     return;
   }
-
   item.quantity -= 1;
   saveCart();
   drawCart();
@@ -293,13 +276,9 @@ function clearAll() {
 }
 
 function drawCart() {
+  if (!el.cartList) return;
   if (app.cart.length === 0) {
-    el.cartList.innerHTML = `
-      <div class="rounded-[2rem] border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-        <p class="text-lg font-bold">Your cart is empty.</p>
-        <p class="mt-2 text-sm text-slate-500">Add a few products to see them here.</p>
-      </div>
-    `;
+    el.cartList.innerHTML = `<div class="rounded-[2rem] border border-dashed border-slate-300 bg-slate-50 p-8 text-center"><p class="text-lg font-bold">Your cart is empty.</p><p class="mt-2 text-sm text-slate-500">Add a few products to see them here.</p></div>`;
     return;
   }
 
@@ -335,29 +314,30 @@ function drawCart() {
 }
 
 function openCart() {
+  if (!el.cartSide || !el.cover) return;
   el.cartSide.classList.remove("translate-x-full");
   el.cover.classList.remove("opacity-0", "pointer-events-none");
   document.body.classList.add("overflow-hidden");
 }
 
 function closeCart() {
+  if (!el.cartSide || !el.cover) return;
   el.cartSide.classList.add("translate-x-full");
   el.cover.classList.add("opacity-0", "pointer-events-none");
   document.body.classList.remove("overflow-hidden");
 }
 
 function syncSearch(value) {
-  el.search.value = value;
-  el.searchSm.value = value;
+  if (el.search) el.search.value = value;
+  if (el.searchSm) el.searchSm.value = value;
   app.word = value.trim();
   filterItems();
-
-  if (app.word) {
+  if (app.word && el.shop)
     el.shop.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
 }
 
 function showTopBtn() {
+  if (!el.topBtn) return;
   if (window.scrollY > window.innerHeight * 0.6) {
     el.topBtn.classList.remove("hidden");
     el.topBtn.classList.add("flex");
@@ -367,37 +347,205 @@ function showTopBtn() {
   }
 }
 
+function checkEmail(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function checkName(value) {
+  return /^[A-Za-z\s]+$/.test(value);
+}
+
+function formatName(value) {
+  return value.toLowerCase().replace(/\b\w/g, function (char) {
+    return char.toUpperCase();
+  });
+}
+
+function handleContactForm() {
+  if (!el.contactForm) return;
+  el.contactForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    let name = el.contactName.value.trim();
+    const email = el.contactEmail.value.trim();
+    const message = el.contactMessage.value.trim();
+
+    name = formatName(name);
+    el.contactName.value = name;
+
+    if (!name || !email || !message) {
+      el.contactMsg.textContent = "Please fill in all the fields.";
+      el.contactMsg.className = "text-sm text-red-500";
+      return;
+    }
+
+    if (!checkName(name)) {
+      el.contactMsg.textContent = "Name should contain only letters.";
+      el.contactMsg.className = "text-sm text-red-500";
+      return;
+    }
+
+    if (!checkEmail(email)) {
+      el.contactMsg.textContent = "Please enter a valid email address.";
+      el.contactMsg.className = "text-sm text-red-500";
+      return;
+    }
+
+    el.contactMsg.textContent = "Message sent successfully.";
+    el.contactMsg.className = "text-sm text-green-600";
+    el.contactForm.reset();
+  });
+}
+
+function handleLoginForm() {
+  if (!el.loginForm) return;
+  el.loginForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const email = el.loginEmail.value.trim();
+    const password = el.loginPassword.value.trim();
+    el.loginEmailErr.textContent = "";
+    el.loginPasswordErr.textContent = "";
+    el.loginMsg.textContent = "";
+    let ok = true;
+
+    if (!email) {
+      el.loginEmailErr.textContent = "Email is required.";
+      ok = false;
+    } else if (!checkEmail(email)) {
+      el.loginEmailErr.textContent = "Enter a valid email address.";
+      ok = false;
+    }
+
+    if (!password) {
+      el.loginPasswordErr.textContent = "Password is required.";
+      ok = false;
+    } else if (password.length < 6) {
+      el.loginPasswordErr.textContent =
+        "Password must be at least 6 characters.";
+      ok = false;
+    }
+
+    if (!ok) return;
+    el.loginMsg.textContent = "Login successful.";
+    el.loginMsg.className = "text-sm text-green-600";
+    el.loginForm.reset();
+  });
+}
+
+function handleRegisterForm() {
+  if (!el.registerForm) return;
+  el.registerForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    let name = el.regName.value.trim();
+    const email = el.regEmail.value.trim();
+    const password = el.regPassword.value.trim();
+    const confirm = el.regConfirm.value.trim();
+
+    name = formatName(name);
+    el.regName.value = name;
+
+    el.regNameErr.textContent = "";
+    el.regEmailErr.textContent = "";
+    el.regPasswordErr.textContent = "";
+    el.regConfirmErr.textContent = "";
+    el.registerMsg.textContent = "";
+    let ok = true;
+
+    if (!name) {
+      el.regNameErr.textContent = "Full name is required.";
+      ok = false;
+    } else if (!checkName(name)) {
+      el.regNameErr.textContent = "Name should contain only letters.";
+      ok = false;
+    } else if (name.length < 3) {
+      el.regNameErr.textContent = "Name must be at least 3 characters.";
+      ok = false;
+    }
+
+    if (!email) {
+      el.regEmailErr.textContent = "Email is required.";
+      ok = false;
+    } else if (!checkEmail(email)) {
+      el.regEmailErr.textContent = "Enter a valid email address.";
+      ok = false;
+    }
+
+    if (!password) {
+      el.regPasswordErr.textContent = "Password is required.";
+      ok = false;
+    } else if (password.length < 6) {
+      el.regPasswordErr.textContent = "Password must be at least 6 characters.";
+      ok = false;
+    }
+
+    if (!confirm) {
+      el.regConfirmErr.textContent = "Please confirm your password.";
+      ok = false;
+    } else if (confirm !== password) {
+      el.regConfirmErr.textContent = "Passwords do not match.";
+      ok = false;
+    }
+
+    if (!ok) return;
+    el.registerMsg.textContent = "Registration successful.";
+    el.registerMsg.className = "text-sm text-green-600";
+    el.registerForm.reset();
+  });
+}
+
 function events() {
-  el.search.addEventListener("input", function (e) {
-    syncSearch(e.target.value);
-  });
-
-  el.searchSm.addEventListener("input", function (e) {
-    syncSearch(e.target.value);
-  });
-
-  el.cartBtn.addEventListener("click", openCart);
-  el.cartBtnSm.addEventListener("click", openCart);
-  el.closeCart.addEventListener("click", closeCart);
-  el.cover.addEventListener("click", closeCart);
-  el.clearBtn.addEventListener("click", clearAll);
-
-  el.menuBtn.addEventListener("click", function () {
-    el.menu.classList.toggle("hidden");
-  });
-
-  const menuLinks = el.menu.querySelectorAll("a");
-  menuLinks.forEach(function(link) {
-    link.addEventListener("click", function () {
-      el.menu.classList.add("hidden");
+  if (el.search)
+    el.search.addEventListener("input", function (e) {
+      syncSearch(e.target.value);
     });
-  });
+  if (el.searchSm)
+    el.searchSm.addEventListener("input", function (e) {
+      syncSearch(e.target.value);
+    });
+  if (el.cartBtn) el.cartBtn.addEventListener("click", openCart);
+  if (el.cartBtnSm) el.cartBtnSm.addEventListener("click", openCart);
+  if (el.closeCart) el.closeCart.addEventListener("click", closeCart);
+  if (el.cover) el.cover.addEventListener("click", closeCart);
+  if (el.clearBtn) el.clearBtn.addEventListener("click", clearAll);
 
-  el.topBtn.addEventListener("click", function () {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+  if (el.menuBtn) {
+    el.menuBtn.addEventListener("click", function () {
+      el.menu.classList.toggle("hidden");
+    });
+  }
+
+  if (el.menu) {
+    const menuLinks = el.menu.querySelectorAll("a");
+    menuLinks.forEach(function (link) {
+      link.addEventListener("click", function () {
+        el.menu.classList.add("hidden");
+      });
+    });
+  }
+
+  if (el.topBtn) {
+    el.topBtn.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
+  if (el.regName) {
+    el.regName.addEventListener("input", function (e) {
+      e.target.value = formatName(e.target.value).replace(/[^A-Za-z\s]/g, "");
+    });
+  }
+
+  if (el.contactName) {
+    el.contactName.addEventListener("input", function (e) {
+      e.target.value = formatName(e.target.value).replace(/[^A-Za-z\s]/g, "");
+    });
+  }
 
   window.addEventListener("scroll", showTopBtn);
+  handleContactForm();
+  handleLoginForm();
+  handleRegisterForm();
 }
 
 events();
