@@ -426,9 +426,11 @@ function handleLoginForm() {
     }
 
     if (!ok) return;
-    el.loginMsg.textContent = "Login successful.";
+    el.loginMsg.textContent = "Login successful. Redirecting...";
     el.loginMsg.className = "text-sm text-green-600";
-    el.loginForm.reset();
+    setTimeout(function (){
+      window.location.href = "index.html";
+    }, 800);
   });
 }
 
